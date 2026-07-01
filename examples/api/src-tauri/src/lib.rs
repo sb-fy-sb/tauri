@@ -655,6 +655,10 @@ pub fn run_app<R: Runtime, F: FnOnce(&App<R>) + Send + 'static>(
           log::info!("[RunEvent] Resumed");
           "Resumed"
         }
+        RunEvent::Suspended => {
+          log::info!("[RunEvent] Suspended");
+          "Suspended"
+        }
         RunEvent::MainEventsCleared => {
           use std::sync::atomic::{AtomicBool, Ordering};
           static LOGGED: AtomicBool = AtomicBool::new(false);
@@ -701,6 +705,21 @@ pub fn run_app<R: Runtime, F: FnOnce(&App<R>) + Send + 'static>(
         }
         #[cfg(target_os = "macos")]
         RunEvent::Reopen { .. } => "Reopen",
+        #[cfg(target_env = "ohos")]
+        RunEvent::Started => {
+          log::info!("[RunEvent] Started");
+          "Started"
+        }
+        #[cfg(target_env = "ohos")]
+        RunEvent::SaveStateRequested => {
+          log::info!("[RunEvent] SaveStateRequested");
+          "SaveStateRequested"
+        }
+        #[cfg(target_env = "ohos")]
+        RunEvent::ContentRectChanged { rect, reason } => {
+          log::info!("[RunEvent] ContentRectChanged, rect={:?}, reason={}", rect, reason);
+          "ContentRectChanged"
+        }
         _ => "",
       };
       if !event_name.is_empty() {

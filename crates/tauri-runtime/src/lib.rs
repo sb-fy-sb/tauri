@@ -221,6 +221,8 @@ pub enum RunEvent<T: UserEvent> {
   Ready,
   /// Sent if the event loop is being resumed.
   Resumed,
+  /// Sent if the event loop is being suspended (app going to background).
+  Suspended,
   /// Emitted when all of the event loop's input events have been processed and redraw processing is about to begin.
   ///
   /// This event is useful as a place to put your code that should be run after all state-changing events have been handled and you want to do stuff (updating state, performing calculations, etc) that happens as the "main body" of your event loop.
@@ -249,6 +251,20 @@ pub enum RunEvent<T: UserEvent> {
     ///
     /// This lets you determine why the scene was requested.
     options: objc2::rc::Retained<objc2_ui_kit::UISceneConnectionOptions>,
+  },
+  /// Emitted when the application has been started (OHOS only).
+  #[cfg(target_env = "ohos")]
+  Started,
+  /// Emitted when the system requests the application to save its state (OHOS only).
+  #[cfg(target_env = "ohos")]
+  SaveStateRequested,
+  /// Emitted when the application's content rect has changed (OHOS only).
+  #[cfg(target_env = "ohos")]
+  ContentRectChanged {
+    /// The new content rectangle (left, top, width, height).
+    rect: (i32, i32, i32, i32),
+    /// Reason for the change.
+    reason: u32,
   },
 }
 

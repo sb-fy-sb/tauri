@@ -249,6 +249,8 @@ pub enum RunEvent {
   Ready,
   /// Sent if the event loop is being resumed.
   Resumed,
+  /// Sent if the event loop is being suspended (app going to background).
+  Suspended,
   /// Emitted when all of the event loop's input events have been processed and redraw processing is about to begin.
   ///
   /// This event is useful as a place to put your code that should be run after all state-changing events have been handled and you want to do stuff (updating state, performing calculations, etc) that happens as the "main body" of your event loop.
@@ -302,6 +304,20 @@ pub enum RunEvent {
     ///
     /// This lets you determine why the scene was requested.
     options: objc2::rc::Retained<objc2_ui_kit::UISceneConnectionOptions>,
+  },
+  /// Emitted when the application has been started (OHOS only).
+  #[cfg(target_env = "ohos")]
+  Started,
+  /// Emitted when the system requests the application to save its state (OHOS only).
+  #[cfg(target_env = "ohos")]
+  SaveStateRequested,
+  /// Emitted when the application's content rect has changed, e.g. keyboard shown/hidden (OHOS only).
+  #[cfg(target_env = "ohos")]
+  ContentRectChanged {
+    /// The new content rectangle (left, top, width, height).
+    rect: (i32, i32, i32, i32),
+    /// Reason for the change.
+    reason: u32,
   },
 }
 
@@ -2621,6 +2637,7 @@ fn on_event_loop_event<R: Runtime>(
       RunEvent::Ready
     }
     RuntimeRunEvent::Resumed => RunEvent::Resumed,
+    RuntimeRunEvent::Suspended => RunEvent::Suspended,
     RuntimeRunEvent::MainEventsCleared => RunEvent::MainEventsCleared,
     RuntimeRunEvent::UserEvent(t) => {
       match t {
@@ -2682,6 +2699,14 @@ fn on_event_loop_event<R: Runtime>(
     #[cfg(target_os = "ios")]
     RuntimeRunEvent::SceneRequested { scene, options } => {
       RunEvent::SceneRequested { scene, options }
+    }
+    #[cfg(target_env = "ohos")]
+    RuntimeRunEvent::Started => RunEvent::Started,
+    #[cfg(target_env = "ohos")]
+    RuntimeRunEvent::SaveStateRequested => RunEvent::SaveStateRequested,
+    #[cfg(target_env = "ohos")]
+    RuntimeRunEvent::ContentRectChanged { rect, reason } => {
+      RunEvent::ContentRectChanged { rect, reason }
     }
     _ => unimplemented!(),
   };
